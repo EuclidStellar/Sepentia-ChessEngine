@@ -26,6 +26,32 @@ class GameState():
         self.board[move.endRow][move.endCol] = move.pieceMoved
         self.moveLog.append(move)
         self.whiteToMove = not self.whiteToMove
+        
+    '''
+    Undo the last move made'''
+    
+    def undoMove(self):
+        if len(self.moveLog) != 0:
+            move = self.moveLog.pop()
+            self.board[move.startRow][move.startCol] = move.pieceMoved
+            self.board[move.endRow][move.endCol] = move.pieceCaptured
+            self.whiteToMove = not self.whiteToMove
+
+    '''
+    All moves considering checks'''
+    
+    def getValidMoves(self):
+        return self.getAllPossibleMoves()
+    
+    '''
+    all possible moves '''
+    
+    def getAllPossibleMoves(self):
+        pass            
+            
+            
+            
+            
     
 class Move():
     
