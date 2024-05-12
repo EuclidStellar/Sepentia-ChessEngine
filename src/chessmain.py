@@ -39,6 +39,14 @@ def main():
     square_selected = () #no square is selected initially, this will keep track of the last click of the user (tuple(row,col))
     player_clicks = [] #this will keep track of player clicks (two tuples)
     game_over = False
+    
+    
+    white_did_check = ""
+    black_did_check = ""
+    last_move_printed = False
+    moves_list = []
+
+    turn = 1
 
     while running:
         for e in p.event.get():  
@@ -83,19 +91,34 @@ def main():
                             if move == valid_moves[i]:
                                 print(move.getChessNotation()) 
                                 game_state.makeMove(valid_moves[i])
+                                if game_state.checkForPinsAndChecks()[0]:
+                                    if not game_state.white_to_move:
+                                        white_did_check = "+"
+                                    else:
+                                        black_did_check = "+"
                                 move_made = True
                                 animate = True
                                 square_selected = () #reset user clicks
                                 player_clicks = [] 
+                                if game_state.white_to_move:
+                                    moves_list.append(f"\n{turn}. {game_state.move_log[-2].getChessNotation()}{white_did_check} {game_state.move_log[-1].getChessNotation()}{black_did_check}")
+                                    print(f"\n{turn}. {game_state.move_log[-2].getChessNotation()}{white_did_check} {game_state.move_log[-1].getChessNotation()}{black_did_check}", end= "")
+                                    turn+=1
+                                    white_did_check = ""
+                                    black_did_check = ""
                         if not move_made:
                             player_clicks = [square_selected]
             #key handler
             elif e.type == p.KEYDOWN:
                 if e.key == p.K_z: #undo when 'z' is pressed
+                    if game_state.white_to_move:
+                        if turn > 1:
+                            turn -= 1
                     game_state.undoMove()
                     move_made = True
                     animate = False
                     game_over = False
+                    last_move_printed = False
                 if e.key == p.K_r: #reset the game when 'r' is pressed
                     game_state = ChessEngine.GameState()
                     valid_moves = game_state.getValidMoves()
@@ -104,6 +127,9 @@ def main():
                     move_made = False
                     animate = False
                     game_over = False
+                    turn = 1
+                    last_move_printed = False
+                    moves_list = []
                     
         if move_made:
             if animate:
@@ -119,11 +145,33 @@ def main():
             game_over = True
             if game_state.white_to_move:
                 drawText(screen, "Black wins by checkmate")
+                if not last_move_printed:
+                    moves_list[-1] += "+"
+                    moves_list.append("result: 0-1")
+                    print("+")
+                    print("result: 0-1")
+                    last_move_printed = True
+                    saveGame(moves_list)
             else:
                 drawText(screen, "White wins by checkmate")
+                if not last_move_printed:
+                    moves_list.append(f"\n{turn}. {game_state.move_log[-1].getChessNotation()}++")
+                    moves_list.append("result: 1-0")
+                    print(f"\n{turn}. {game_state.move_log[-1].getChessNotation()}++")
+                    print("result: 1-0")
+                    last_move_printed = True
+                    saveGame(moves_list)
         elif game_state.stale_mate:
             game_over = True
             drawText(screen, "Stalemate")
+            if not last_move_printed:
+                if not game_state.white_to_move():
+                    moves_list.append(f"\n{turn}. {game_state.move_log[-1].getChessNotation()}")
+                    moves_list.append("result: 1/2-1/2")
+                    print(f"\n{turn}. {game_state.move_log[-1].getChessNotation()}")
+                    print("result: 1/2-1/2")
+                    last_move_printed = True      
+                    saveGame(moves_list)
 
         clock.tick(MAX_FPS)
         p.display.flip()
@@ -136,6 +184,20 @@ def drawText(screen, text):
     text_object = font.render(text, 0, p.Color('black'))
     screen.blit(text_object, text_location.move(2,2))
 
+def saveGame(moves_list):
+    result = moves_list.pop()
+    turns_dict = {}
+    for i in range(len(moves_list)-1,-1,-1):
+        try:
+            if int(moves_list[i][1]) not in turns_dict:
+                turns_dict[moves_list[i][1]] = moves_list[i][1:]+"\n"
+        except:
+            pass
+    file = open("last_game_logs.txt","w")
+    for turn in sorted(turns_dict.keys()):
+        file.write(turns_dict[turn])
+    file.write(result)
+    file.close()
 
 def highlightSquares(screen, game_state, valid_moves, square_selected):
     '''
