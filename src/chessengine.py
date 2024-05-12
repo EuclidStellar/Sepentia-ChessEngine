@@ -47,10 +47,27 @@ class GameState():
     all possible moves '''
     
     def getAllPossibleMoves(self):
-        pass            
+        moves = [Move((6, 4), (4, 4), self.board)]
+        for r in range(len(self.board)):
+            for c in range(len(self.board[r])):
+                turn = self.board[r][c][0]
+                if (turn == 'w' and self.whiteToMove) or (turn == 'b' and not self.whiteToMove):
+                    piece = self.board[r][c][1]
+                    if piece == 'P':
+                        self.getPawnMoves(r, c, moves)
+                    elif piece == 'R':
+                        self.getRookMoves(r, c, moves)
+        
+        return moves
+        
+       
             
-            
-            
+    def getPawnMoves(self, r, c, moves):
+        pass
+    
+    def getRookMoves(self, r, c, moves):
+        pass
+    
             
     
 class Move():
@@ -69,6 +86,17 @@ class Move():
         self.pieceMoved = board[self.startRow][self.startCol]
         self.pieceCaptured = board[self.endRow][self.endCol]
         self.moveID = self.startRow * 1000 + self.startCol * 100 + self.endRow * 10 + self.endCol
+        print(self.moveID)
+        
+    
+    '''
+    Overriding the equals method'''
+    def __eq__(self, other):
+        if isinstance(other, Move):
+            return self.moveID == other.moveID
+        return False
+        
+     
     
     def getChessNotation(self):
         #you can add to make this like real chess notation
