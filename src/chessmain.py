@@ -92,7 +92,7 @@ def drawBoard(screen):
     Draw the squares on the board.
     The top left square is always light.
     '''
-    colors = [p.Color("white"), p.Color("gray")]
+    colors = [p.Color("white"), p.Color("dark green")]
     for row in range(DIMENSION):
         for column in range(DIMENSION):
             color = colors[((row+column) % 2)]
