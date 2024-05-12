@@ -1,10 +1,10 @@
-1. Bxc4 e5
-2. e4 dxe4
-3. Bb5+ Qd7
-4. Bxd7+ Kxd7
-5. d3 exd3
-6. Qxd3+ Ke8
-7. Qd5 g5
-8. Bb5+ Bd7
-9. Nc3 g4
+1. d4 e6
+2. Nc3 Qh4
+3. g3 Bc5
+4. gxh4 Ba3
+5. bxa3 a5
+6. Qd3 Kd8
+7. Qg3 f5
+8. Qxg7 b6
+9. Bg5+ Nf6
 result: 1-0
