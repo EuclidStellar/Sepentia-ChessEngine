@@ -49,7 +49,7 @@ def main():
     turn = 1
     
     player_one = True #if a human is playing white, then this will be True, else False
-    player_two = True #if a human is playing white, then thiss will be True, else False
+    player_two = False #if a human is playing white, then thiss will be True, else False
 
     while running:
         human_turn = (game_state.white_to_move and player_one) or (not game_state.white_to_move and player_two)
@@ -60,26 +60,6 @@ def main():
                 sys.exit()
             #mouse handler            
             elif e.type == p.MOUSEBUTTONDOWN:
-                
-                # location = p.mouse.get_pos() #(x, y) location of the mouse
-                # col = location[0] // SQUARE_SIZE
-                # row = location[1] // SQUARE_SIZE
-                # if square_selected == (row, col): #user clicked the same square twice
-                #     square_selected = () #deselect
-                #     player_clicks = [] #clear clicks
-                # else:
-                #     square_selected = (row, col)
-                #     player_clicks.append(square_selected) #append for both 1st and 2nd click
-                # if len(player_clicks) == 2: #after 2nd click
-                #     move = ChessEngine.Move(player_clicks[0], player_clicks[1], game_state.board)  
-                #     for i in range(len(valid_moves)):
-                #         if move == valid_moves[i]:
-                #             game_state.makeMove(valid_moves[i])
-                #             move_made = True
-                #             square_selected = ()
-                #             player_clicks = []
-                #     if not move_made:
-                #         player_clicks = [square_selected]
                 if not game_over and human_turn:
                     location = p.mouse.get_pos() #(x, y) location of the mouse
                     col = location[0] // SQUARE_SIZE
@@ -94,13 +74,11 @@ def main():
                         move = ChessEngine.Move(player_clicks[0], player_clicks[1], game_state.board)  
                         for i in range(len(valid_moves)):
                             if move == valid_moves[i]:
-                                print(move.getChessNotation()) 
                                 game_state.makeMove(valid_moves[i])
-                                
                                 move_made = True
                                 animate = True
                                 square_selected = () #reset user clicks
-                            player_clicks = []  #reset user clicks
+                                player_clicks = []   
                         if not move_made:
                             player_clicks = [square_selected]
             #key handler
@@ -125,11 +103,17 @@ def main():
                     turn = 1
                     last_move_printed = False
                     moves_list = []
-                    
-             #AI move finder
+
+        #AI move finder
         if not game_over and not human_turn:
-            AI_move = ChessAI.findRandomMove(valid_moves)
-            game_state.makeMove(AI_move)
+            # AI_move = ChessAI.findRandomMove(valid_moves)
+            # game_state.makeMove(AI_move)
+            #AI_move = ChessAI.findRandomMove(valid_moves)
+            # AI_move = ChessAI.findBestMove(game_state, valid_moves)
+            AI_move = ChessAI.findBestMoveMinMax(game_state, valid_moves)
+            if AI_move is None:
+                AI_move = ChessAI.findRandomMove(valid_moves)
+            game_state.makeMove(AI_move )
             move_made = True
             animate = True
                     
@@ -178,7 +162,7 @@ def main():
             game_over = True
             drawText(screen, "Stalemate")
             if not last_move_printed:
-                if not game_state.white_to_move():
+                if not game_state.white_to_move:
                     moves_list.append(f"\n{turn}. {game_state.move_log[-1].getChessNotation()}")
                     moves_list.append("result: 1/2-1/2")
                     print(f"\n{turn}. {game_state.move_log[-1].getChessNotation()}")
