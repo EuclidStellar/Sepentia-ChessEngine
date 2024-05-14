@@ -531,7 +531,7 @@ class GameState:
                         self.white_king_location = (row, col)
                     else:
                         self.black_king_location = (row, col)
-
+    
     def getCastleMoves(self, row, col, moves):
         """
         Generate all valid castle moves for the king at (row, col) and add them to the list of moves.

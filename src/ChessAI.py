@@ -2,6 +2,8 @@
 Handling the AI moves.
 """
 import random
+import threading
+import queue
 
 piece_score = {"K": 0, "Q": 9, "R": 5, "B": 3, "N": 3, "p": 1}
 
@@ -63,17 +65,26 @@ piece_position_scores = {"wN": knight_scores,
 
 CHECKMATE = 10000
 STALEMATE = 0
-DEPTH = 4
+DEPTH = 5
+
 
 def orderMoves(moves, game_state):
-    # Order moves based on captures
+    # Order moves based on captures and high-value targets
     capture_moves = [move for move in moves if game_state.board[move.end_row][move.end_col] != "--"]
     quiet_moves = [move for move in moves if move not in capture_moves]
     
-    # You can further refine move ordering based on other heuristics
+    # Sort capture moves by their value
+    #what will be benifit if this ? benifit is that we will capture the high value pieces first
+    capture_moves.sort(key=lambda move: piece_score[game_state.board[move.end_row][move.end_col][1]], reverse=True)
+
+    # Sort quiet moves by their positional score
+    #what will be benifit if this ? benifit is that we will move the pieces to the best position
+    quiet_moves.sort(key=lambda move: piece_position_scores.get(game_state.board[move.start_row][move.start_col], [[0]*8]*8)[move.end_row][move.end_col], reverse=True)
+    
     ordered_moves = capture_moves + quiet_moves
 
     return ordered_moves
+
 
 def findMoveNegaMaxAlphaBeta(game_state, valid_moves, depth, alpha, beta, turn_multiplier):
     global next_move
@@ -173,31 +184,7 @@ def findBestMove(game_state, valid_moves, return_queue):
     findMoveNegaMaxAlphaBeta(game_state, valid_moves, DEPTH, -CHECKMATE, CHECKMATE,
                              1 if game_state.white_to_move else -1)
     return_queue.put(next_move)
-
-    
-# def findMoveNegaMaxAlphaBeta(game_state, valid_moves, depth, alpha, beta, turn_multiplier):
-#     global next_move
-#     if depth == 0:
-#         return turn_multiplier * scoreBoard(game_state)
-#     # move ordering - implement later //TODO
-    
-#     max_score = -CHECKMATE
-#     for move in valid_moves:
-#         game_state.makeMove(move)
-#         next_moves = game_state.getValidMoves()
-#         score = -findMoveNegaMaxAlphaBeta(game_state, next_moves, depth - 1, -beta, -alpha, -turn_multiplier)
-#         if score > max_score:
-#             max_score = score
-#             if depth == DEPTH:
-#                 next_move = move
-#         game_state.undoMove()
-#         if max_score > alpha:
-#             alpha = max_score
-#         if alpha >= beta:
-#             break
-#     return max_score
-
-
+        
 def scoreBoard(game_state):
     """
     Score the board. A positive score is good for white, a negative score is good for black.
@@ -230,5 +217,8 @@ def findRandomMove(valid_moves):
     Picks and returns a random valid move.
     """
     return random.choice(valid_moves)
+
+
+
 
 
