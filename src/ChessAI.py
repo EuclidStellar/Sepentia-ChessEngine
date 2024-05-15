@@ -5,52 +5,54 @@ import random
 import threading
 import queue
 
-piece_score = {"K": 0, "Q": 9, "R": 5, "B": 3, "N": 3, "p": 1}
+piece_score = {"K": 6000, "Q": 929, "R": 512, "B": 320, "N": 280, "p": 100}
 
-knight_scores = [[0.0, 0.1, 0.2, 0.2, 0.2, 0.2, 0.1, 0.0],
-                 [0.1, 0.3, 0.5, 0.5, 0.5, 0.5, 0.3, 0.1],
-                 [0.2, 0.5, 0.6, 0.65, 0.65, 0.6, 0.5, 0.2],
-                 [0.2, 0.55, 0.65, 0.7, 0.7, 0.65, 0.55, 0.2],
-                 [0.2, 0.5, 0.65, 0.7, 0.7, 0.65, 0.5, 0.2],
-                 [0.2, 0.55, 0.6, 0.65, 0.65, 0.6, 0.55, 0.2],
-                 [0.1, 0.3, 0.5, 0.55, 0.55, 0.5, 0.3, 0.1],
+
+pawn_scores = [[ 0,   0,   0,   0,   0,   0,   0,   0,],
+                 [78,  83,  86,  73, 102,  82,  85,  90],
+                 [ 7,  29,  21,  44,  40,  31,  44,   7],
+                 [-17,  16,  -2,  15,  14,   0,  15, -13],
+                 [-26,   3,  10,   9,   6,   1,   0, -23],
+                 [-22,   9,   5, -11, -10,  -2,   3, -19],
+                 [-31,   8,  -7, -37, -36, -14,   3, -31],
                  [0.0, 0.1, 0.2, 0.2, 0.2, 0.2, 0.1, 0.0]]
 
-bishop_scores = [[0.0, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.0],
-                 [0.2, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.2],
-                 [0.2, 0.4, 0.5, 0.6, 0.6, 0.5, 0.4, 0.2],
-                 [0.2, 0.5, 0.5, 0.6, 0.6, 0.5, 0.5, 0.2],
-                 [0.2, 0.4, 0.6, 0.6, 0.6, 0.6, 0.4, 0.2],
-                 [0.2, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.2],
-                 [0.2, 0.5, 0.4, 0.4, 0.4, 0.4, 0.5, 0.2],
-                 [0.0, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.0]]
+bishop_scores = [[-59, -78, -82, -76, -23, -107, -37, -50],
+                 [-11, 20, 35, -42, -39, 31, 2, -22],
+                 [-9, 39, -32, 41, 52, -10, 28, -14],
+                 [25, 17, 20, 34, 26, 25, 15, 10],
+                 [13, 10, 17, 23, 17, 16, 0, 7],
+                 [14, 25, 24, 15, 8, 25, 20, 15],
+                 [19, 20, 11, 6, 7, 6, 20, 16],
+                 [-7, 2, -15, -12, -14, -15, -10, -10]]
 
-rook_scores = [[0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25],
-               [0.5, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.5],
-               [0.0, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.0],
-               [0.0, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.0],
-               [0.0, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.0],
-               [0.0, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.0],
-               [0.0, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.0],
-               [0.25, 0.25, 0.25, 0.5, 0.5, 0.25, 0.25, 0.25]]
+rook_scores = [[35,  29,  33,   4,  37,  33,  56,  50],
+               [55,  29,  56,  67,  55,  62,  34,  60],
+               [19,  35,  28,  33,  45,  27,  25,  15],
+               [0,    5,  16,  13,  18,  -4,  -9,  -6],
+               [-28, -35, -16, -21, -13, -29, -46, -30],
+               [-42, -28, -42, -25, -25, -35, -26, -46],
+               [-53, -38, -31, -26, -29, -43, -44, -53],
+               [-30, -24, -18,   5,  -2, -18, -31, -32]]
 
-queen_scores = [[0.0, 0.2, 0.2, 0.3, 0.3, 0.2, 0.2, 0.0],
-                [0.2, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.2],
-                [0.2, 0.4, 0.5, 0.5, 0.5, 0.5, 0.4, 0.2],
-                [0.3, 0.4, 0.5, 0.5, 0.5, 0.5, 0.4, 0.3],
-                [0.4, 0.4, 0.5, 0.5, 0.5, 0.5, 0.4, 0.3],
-                [0.2, 0.5, 0.5, 0.5, 0.5, 0.5, 0.4, 0.2],
-                [0.2, 0.4, 0.5, 0.4, 0.4, 0.4, 0.4, 0.2],
-                [0.0, 0.2, 0.2, 0.3, 0.3, 0.2, 0.2, 0.0]]
+queen_scores = [[  6,   1,  -8, -104,  69,  24,  88,  26],
+                [ 14,  32,  60,  -10,  20,  76,  57,  24],
+                [ -2,  43,  32,   60,  72,  63,  43,   2],
+                [  1, -16,  22,   17,  25,  20, -13,  -6],
+                [ -14, -15,  -2,   -5,  -1, -10, -20, -22],
+                [ -30,  -6, -13,  -11, -16, -11, -16, -27],
+                [ -36, -18,   0,  -19, -15, -15, -21, -38],
+                [ -39, -30, -31,  -13, -31, -36, -34, -42]]
 
-pawn_scores = [[0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8],
-               [0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7],
-               [0.3, 0.3, 0.4, 0.5, 0.5, 0.4, 0.3, 0.3],
-               [0.25, 0.25, 0.3, 0.45, 0.45, 0.3, 0.25, 0.25],
-               [0.2, 0.2, 0.2, 0.4, 0.4, 0.2, 0.2, 0.2],
-               [0.25, 0.15, 0.1, 0.2, 0.2, 0.1, 0.15, 0.25],
-               [0.25, 0.3, 0.3, 0.0, 0.0, 0.3, 0.3, 0.25],
-               [0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2]]
+
+knight_scores = [[-66, -53, -75, -75, -10, -55, -58, -70],
+                 [-3, -6, 100, -36, 4, 62, -4, -14],
+                 [10, 67, 1, 74, 73, 27, 62, -2],
+                 [24, 24, 45, 37, 33, 41, 25, 17],
+                 [-1, 5, 31, 21, 22, 35, 2, 0],
+                 [-18, 10, 13, 22, 18, 15, 11, -14],
+                 [-23, -15, 2, 0, 2, 0, -23, -20],
+                 [-66, -53, -75, -75, -10, -55, -58, -70]]
 
 piece_position_scores = {"wN": knight_scores,
                          "bN": knight_scores[::-1],
@@ -65,7 +67,7 @@ piece_position_scores = {"wN": knight_scores,
 
 CHECKMATE = 10000
 STALEMATE = 0
-DEPTH = 5
+DEPTH = 4
 
 
 def orderMoves(moves, game_state):
@@ -73,11 +75,9 @@ def orderMoves(moves, game_state):
     capture_moves = [move for move in moves if game_state.board[move.end_row][move.end_col] != "--"]
     quiet_moves = [move for move in moves if move not in capture_moves]
     
-    # Sort capture moves by their value
     #what will be benifit if this ? benifit is that we will capture the high value pieces first
     capture_moves.sort(key=lambda move: piece_score[game_state.board[move.end_row][move.end_col][1]], reverse=True)
 
-    # Sort quiet moves by their positional score
     #what will be benifit if this ? benifit is that we will move the pieces to the best position
     quiet_moves.sort(key=lambda move: piece_position_scores.get(game_state.board[move.start_row][move.start_col], [[0]*8]*8)[move.end_row][move.end_col], reverse=True)
     
@@ -92,7 +92,7 @@ def findMoveNegaMaxAlphaBeta(game_state, valid_moves, depth, alpha, beta, turn_m
         return turn_multiplier * scoreBoard(game_state)
 
     max_score = -CHECKMATE
-    # Move Ordering: Sort moves based on some heuristic
+    # Move Ordering: Sorting moves based on some heuristic 
     ordered_moves = orderMoves(valid_moves, game_state)
     for move in ordered_moves:
         game_state.makeMove(move)
@@ -109,18 +109,18 @@ def findMoveNegaMaxAlphaBeta(game_state, valid_moves, depth, alpha, beta, turn_m
     return max_score
 
 # Transposition Table
-transposition_table = {}
+transposition_table = {} #used to not re-evaluate position that is already evaluated
 
 def findMove(game_state, valid_moves, return_queue):
     global next_move, transposition_table
     next_move = None
     for depth in range(1, DEPTH + 1):
         findMoveNegaMaxAlphaBetaTT(game_state, valid_moves, depth, -CHECKMATE, CHECKMATE, 1 if game_state.white_to_move else -1)
-        # clear transposition table after each depth iteration
         transposition_table = {}
         if next_move is not None:
             break
     return_queue.put(next_move)
+
 
 def findMoveNegaMaxAlphaBetaTT(game_state, valid_moves, depth, alpha, beta, turn_multiplier):
     global next_move, transposition_table
@@ -165,15 +165,13 @@ def openingMoves(game_state, valid_moves):
     """
     Integrate famous opening moves.
     """
-    # Define opening moves (e.g., for white)
     opening_moves = {"Italian Game": ["e2e4", "e7e5", "g1f3", "b8c6", "f1c4"],
                      "Sicilian Defense": ["e2e4", "c7c5"]}
 
-    # Check if current moves match any opening moves
     current_moves = [move.getChessNotation() for move in game_state.move_log]
     for opening in opening_moves.values():
         if current_moves[:len(opening)] == opening:
-            return valid_moves[len(opening):]  # Return moves after opening moves
+            return valid_moves[len(opening):] 
 
     return valid_moves
 
@@ -219,6 +217,57 @@ def findRandomMove(valid_moves):
     return random.choice(valid_moves)
 
 
+
+
+
+
+# knight_scores = [[0.0, 0.1, 0.2, 0.2, 0.2, 0.2, 0.1, 0.0],
+#                  [0.1, 0.3, 0.5, 0.5, 0.5, 0.5, 0.3, 0.1],
+#                  [0.2, 0.5, 0.6, 0.65, 0.65, 0.6, 0.5, 0.2],
+#                  [0.2, 0.55, 0.65, 0.7, 0.7, 0.65, 0.55, 0.2],
+#                  [0.2, 0.5, 0.65, 0.7, 0.7, 0.65, 0.5, 0.2],
+#                  [0.2, 0.55, 0.6, 0.65, 0.65, 0.6, 0.55, 0.2],
+#                  [0.1, 0.3, 0.5, 0.55, 0.55, 0.5, 0.3, 0.1],
+#                  [0.0, 0.1, 0.2, 0.2, 0.2, 0.2, 0.1, 0.0]]
+
+# bishop_scores = [[0.0, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.0],
+#                  [0.2, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.2],
+#                  [0.2, 0.4, 0.5, 0.6, 0.6, 0.5, 0.4, 0.2],
+#                  [0.2, 0.5, 0.5, 0.6, 0.6, 0.5, 0.5, 0.2],
+#                  [0.2, 0.4, 0.6, 0.6, 0.6, 0.6, 0.4, 0.2],
+#                  [0.2, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.2],
+#                  [0.2, 0.5, 0.4, 0.4, 0.4, 0.4, 0.5, 0.2],
+#                  [0.0, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.0]]
+
+# rook_scores = [[0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25],
+#                [0.5, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.5],
+#                [0.0, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.0],
+#                [0.0, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.0],
+#                [0.0, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.0],
+#                [0.0, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.0],
+#                [0.0, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.0],
+#                [0.25, 0.25, 0.25, 0.5, 0.5, 0.25, 0.25, 0.25]]
+
+# queen_scores = [[0.0, 0.2, 0.2, 0.3, 0.3, 0.2, 0.2, 0.0],
+#                 [0.2, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.2],
+#                 [0.2, 0.4, 0.5, 0.5, 0.5, 0.5, 0.4, 0.2],
+#                 [0.3, 0.4, 0.5, 0.5, 0.5, 0.5, 0.4, 0.3],
+#                 [0.4, 0.4, 0.5, 0.5, 0.5, 0.5, 0.4, 0.3],
+#                 [0.2, 0.5, 0.5, 0.5, 0.5, 0.5, 0.4, 0.2],
+#                 [0.2, 0.4, 0.5, 0.4, 0.4, 0.4, 0.4, 0.2],
+#                 [0.0, 0.2, 0.2, 0.3, 0.3, 0.2, 0.2, 0.0]]
+
+# pawn_scores = [[0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8],
+#                [0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7],
+#                [0.3, 0.3, 0.4, 0.5, 0.5, 0.4, 0.3, 0.3],
+#                [0.25, 0.25, 0.3, 0.45, 0.45, 0.3, 0.25, 0.25],
+#                [0.2, 0.2, 0.2, 0.4, 0.4, 0.2, 0.2, 0.2],
+#                [0.25, 0.15, 0.1, 0.2, 0.2, 0.1, 0.15, 0.25],
+#                [0.25, 0.3, 0.3, 0.0, 0.0, 0.3, 0.3, 0.25],
+#                [0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2]]
+
+
+# test data of positional statistics 
 
 
 

@@ -1,18 +1,5 @@
-"""
-Storing all the information about the current state of chess game.
-Determining valid moves at current state.
-It will keep move log.
-"""
-
-
 class GameState:
     def __init__(self):
-        """
-        Board is an 8x8 2d list, each element in list has 2 characters.
-        The first character represents the color of the piece: 'b' or 'w'.
-        The second character represents the type of the piece: 'R', 'N', 'B', 'Q', 'K' or 'p'.
-        "--" represents an empty space with no piece.
-        """
         self.board = [
             ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
             ["bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp"],
@@ -91,7 +78,12 @@ class GameState:
         self.updateCastleRights(move)
         self.castle_rights_log.append(CastleRights(self.current_castling_rights.wks, self.current_castling_rights.bks,
                                                    self.current_castling_rights.wqs, self.current_castling_rights.bqs))
-
+    def getHashKey(self):
+        """
+        Returns a unique identifier for the current board state.
+        """
+        
+        return str(self.board)
     def undoMove(self):
         """
         Undo the last move
@@ -183,7 +175,7 @@ class GameState:
             if len(self.checks) == 1:  # only 1 check, block the check or move the king
                 moves = self.getAllPossibleMoves()
                 # to block the check you must put a piece into one of the squares between the enemy piece and your king
-                check = self.checks[0]  # check information
+                check = self.checks[0]  # checking information that will be used multiple times
                 check_row = check[0]
                 check_col = check[1]
                 piece_checking = self.board[check_row][check_col]
@@ -292,12 +284,18 @@ class GameState:
                             break
                     elif end_piece[0] == enemy_color:
                         enemy_type = end_piece[1]
+                        
+                        
+                        # for better understanding of the code, refer to the comments in the next line
+                        
                         # 5 possibilities in this complex conditional
                         # 1.) orthogonally away from king and piece is a rook
                         # 2.) diagonally away from king and piece is a bishop
                         # 3.) 1 square away diagonally from king and piece is a pawn
                         # 4.) any direction and piece is a queen
                         # 5.) any direction 1 square away and piece is a king
+                        
+                        
                         if (0 <= j <= 3 and enemy_type == "R") or (4 <= j <= 7 and enemy_type == "B") or (
                                 i == 1 and enemy_type == "p" and (
                                 (enemy_color == "w" and 6 <= j <= 7) or (enemy_color == "b" and 4 <= j <= 5))) or (
@@ -364,6 +362,7 @@ class GameState:
                         if king_col < col:  # king is left of the pawn
                             # inside: between king and the pawn;
                             # outside: between pawn and border;
+                            # inside and outside are used to check if there is a piece blocking the check or not 
                             inside_range = range(king_col + 1, col - 1)
                             outside_range = range(col + 1, 8)
                         else:  # king right of the pawn
@@ -462,7 +461,7 @@ class GameState:
             if 0 <= end_row <= 7 and 0 <= end_col <= 7:
                 if not piece_pinned:
                     end_piece = self.board[end_row][end_col]
-                    if end_piece[0] != ally_color:  # so its either enemy piece or empty square
+                    if end_piece[0] != ally_color:  # not an ally piece - empty or enemy
                         moves.append(Move((row, col), (end_row, end_col), self.board))
 
     def getBishopMoves(self, row, col, moves):
@@ -565,9 +564,7 @@ class CastleRights:
 
 
 class Move:
-    # in chess, fields on the board are described by two symbols, one of them being number between 1-8 (which is corresponding to rows)
-    # and the second one being a letter between a-f (corresponding to columns), in order to use this notation we need to map our [row][col] coordinates
-    # to match the ones used in the original chess game
+    
     ranks_to_rows = {"1": 7, "2": 6, "3": 5, "4": 4,
                      "5": 3, "6": 2, "7": 1, "8": 0}
     rows_to_ranks = {v: k for k, v in ranks_to_rows.items()}
