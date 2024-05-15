@@ -1,4 +1,4 @@
-
+by
 # Sepentia - Chess Engine 
 
 ## Prerequisites
@@ -22,7 +22,7 @@ Before you start, ensure you have the following installed on your system:
    ```
 4. **Open Sepentia in Code Editor (VS code)**:
    ```bash
-   python3 ChessMain.py
+   python3 chessmain.py
    ```
 
 ## Heurestia
