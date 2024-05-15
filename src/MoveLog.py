@@ -1,7 +1,7 @@
 
 
 import pygame as p
-import ChessMain as cm
+import chessmain as cm
 
 
 def drawMoveLog(screen, game_state, font):

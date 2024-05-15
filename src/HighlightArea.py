@@ -1,7 +1,7 @@
 
 import pygame as p
 
-import ChessMain as cm
+import chessmain as cm
 
 def highlightSquares(screen, game_state, valid_moves, square_selected):
     """

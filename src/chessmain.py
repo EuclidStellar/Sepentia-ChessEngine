@@ -1,10 +1,10 @@
 
 import pygame as p
-import ChessEngine, ChessAI , HighlightArea , MoveLog
+import chessengine, ChessAI , HighlightArea , MoveLog
 import sys
 from multiprocessing import Process, Queue
 
-BOARD_WIDTH = BOARD_HEIGHT = 512
+BOARD_WIDTH = BOARD_HEIGHT = 620
 MOVE_LOG_PANEL_WIDTH = 256
 MOVE_LOG_PANEL_HEIGHT = BOARD_HEIGHT
 DIMENSION = 8
@@ -28,7 +28,7 @@ def main():
     screen = p.display.set_mode((BOARD_WIDTH + MOVE_LOG_PANEL_WIDTH, BOARD_HEIGHT))
     clock = p.time.Clock()
     screen.fill(p.Color("white"))
-    game_state = ChessEngine.GameState()
+    game_state = chessengine.GameState()
     valid_moves = game_state.getValidMoves()
     move_made = False  # flag variable for when a move is made
     animate = False  # flag variable for when we should animate a move
@@ -63,7 +63,7 @@ def main():
                         square_selected = (row, col)
                         player_clicks.append(square_selected)  # append for both 1st and 2nd click
                     if len(player_clicks) == 2 and human_turn:  # after 2nd click
-                        move = ChessEngine.Move(player_clicks[0], player_clicks[1], game_state.board)
+                        move = chessengine.Move(player_clicks[0], player_clicks[1], game_state.board)
                         for i in range(len(valid_moves)):
                             if move == valid_moves[i]:
                                 game_state.makeMove(valid_moves[i])
@@ -86,7 +86,7 @@ def main():
                         ai_thinking = False
                     move_undone = True
                 if e.key == p.K_r:  # reset the game when 'r' is pressed
-                    game_state = ChessEngine.GameState()
+                    game_state = chessengine.GameState()
                     valid_moves = game_state.getValidMoves()
                     square_selected = ()
                     player_clicks = []
