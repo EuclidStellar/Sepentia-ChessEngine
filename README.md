@@ -1,3 +1,33 @@
+
+# Sepentia - Chess Engine 
+
+## Prerequisites
+
+Before you start, ensure you have the following installed on your system:
+
+- [Python](https://www.python.org/downloads/) (version 3.6 or higher)
+- [Git](https://git-scm.com/downloads) (optional, if you want to clone the repository)
+
+## Installation Steps
+
+1. **Clone the Repository**:
+
+   ```bash
+   git clone https://github.com/euclidstellar/chess-engine.git
+
+   ```
+2. **Install Pygame**:
+   ```bash
+   pip3 install pygame
+   ```
+4. **Open Sepentia in Code Editor (VS code)**:
+   ```bash
+   cd src
+   python3 ChessMain.py
+   ```
+
+## Heurestia
+
 As AI is a buzzword nowadays, let's talk mathematics and implement some real positional statistics and some algorithms that you have used in cp but never in real life. Ever thought about how Samay Raina's chess-dotcom bot plays against you at 1800 ElO? As Most of your answers will be: we will collect all his game data on how he plays and then train a model that replicates his moves but I mean how you can train something that has 121 million possibilities maybe Chess.com personalise some of his blunders in his bot but that's not how it works 
 
 So, when I was watching Nakamura vs Pragg ( 98.8 vs 98.3 ) I just out of curiosity got a question how these accuracies are calculated 
