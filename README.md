@@ -13,7 +13,7 @@ Before you start, ensure you have the following installed on your system:
 1. **Clone the Repository**:
 
    ```bash
-   git clone https://github.com/euclidstellar/chess-engine.git
+   git clone https://github.com/EuclidStellar/Sepentia-ChessEngine.git
 
    ```
 2. **Install Pygame**:
