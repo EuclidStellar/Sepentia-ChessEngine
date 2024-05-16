@@ -143,6 +143,7 @@ ok let's understanding it with an analogy :
 Imagine you're building a puzzle, and each friend helps with a different section. The depth of the task represents its complexity, like adding more layers to the puzzle. Recursive calls break down complex tasks into smaller parts, just as you might divide a puzzle into smaller sections to solve them. As depth increases, so does the demand for memory and processing power. Here multiprocessing helps by distributing the workload across multiple CPU cores, allowing tasks to be completed faster and more efficiently.
 
 ![Depth](/images/trans-table.jpg)
+
 By far you have got an answer of using multiprocessing let's understand how it gonna help sepentia:
 In Sepentia, the search process involves exploring possible moves and counter-moves where this search can be broken down into independent tasks that can be executed simultaneously. Multiprocessing allows the chess engine to perform these tasks concurrently across multiple CPU cores, drastically speeding up the search process where each core can explore a different branch of the game tree simultaneously, effectively increasing the search depth within the same amount of time. While one process explores a particular branch, other processes can generate moves for subsequent branches, thus overlapping computation and improving efficiency which helps to process more positions per second.
 
