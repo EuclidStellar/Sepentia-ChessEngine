@@ -37,6 +37,8 @@ moreover, minimax is not an optimal algorithm to calculate the best move on the 
 So here's my experience of coding a Chess Engine of 1400 ElO at a depth of 5
 for non-chess players: ELO is a rating stat, and depth is the number of moves you calculate ahead in the game tree to evaluate possible moves 
 
+![Depth](/images/depth.png)
+
 First, we will check all the valid moves available on the chessboard then we use the minimax algorithm to explore each level of the possible game tree where 
 each level represents a player's turn, and each node represents a possible board position after a move. The main objective of the minimax algorithm is to evaluate maximising moves for your turn and evaluating minimising moves for the opponent ( for now, consider this for material on the board algo will always try to have your maximum material on the chessboard for you and minimum for the opponent )
 The main problem with the minimax algorithm is its computational complexity, especially where the branching factor (number of possible moves) is high
@@ -49,11 +51,15 @@ OK now we know how a game tree works and how we search inside a game tree
 but the problem is in chess there's a huge role of positional scores, pawn structures, centre control, forking and pins all these parameters make a chess engine.
 how are we gonna tackle all this?
 well well we have some desired data on the internet through which we can make this possible as each piece has a different value as a material and different value on different positions of the chessboard 
-Example:  king = 0 ( you cannot capture king ), Queen = 9, Rook = 5, Bishop = 3, Knight= 3, pawn=1 [yhese al are material value )
+Example:  king = 0 ( you cannot capture king ), Queen = 9, Rook = 5, Bishop = 3, Knight= 3, pawn=1 [yhese al are material value ]
 positional scores: every piece on the chessboard will have a different position score on 64 blocks based on studies ex: The value 0.0 represents the lowest score, meaning the worst position for a knight. The values increase as we move towards the centre of the board, indicating better positions example: a knight placed in the centre (rows 2 to 5, columns 2 to 5) would have higher scores compared to those placed on the edges with the highest score, 0.7, is assigned to the centre-most squares (row 3, column 3 to 6) the score gradually decreases as we move away from the centre. 
 The role of these scores in the code is to help evaluate the relative strength of different positions on the board for each type of piece during the algorithm’s decision-making process, these scores are used to prioritize moves that lead to positions with higher scores 
 
+![Relative-Positional-value](/images/positional-value.jpg)
+
 example : The positional score of a piece reflects its strength based on its position on the board and in chess, certain positions are more advantageous for pieces than others example, a knight in the center of the board has more mobility and control over squares than a knight stuck in a corner. Similarly, a rook on an open file has more attacking potential than a rook blocked by pawns by incorporating positional scores into the evaluation function of a chess engine, the engine can make smarter decisions about which moves to prioritize. For instance, the engine might prefer moving a piece to a square where it has better control over the board or can support other pieces more effectively.
+
+![Positional-value](/images/positional-value-2.png)
 
 Now let's understand how ordering of move is done and why ordering of move is very important for a chess engine to make decision ?
 By ordering moves, the engine reduces the search space, focusing on the most promising moves first this pruning of less promising moves makes the search more efficient, allowing the engine to explore deeper and find better moves within a given time frame.
@@ -66,6 +72,7 @@ When evaluating the chessboard, we consider two main factors: intrinsic value an
 Checkmate in chess is like one company buying out another. If one company decisively takes over, its value rises while the other company's value becomes zero. Stalemate, on the other hand, is like a merger negotiation that stalls. No company wins or loses; the value remains static.
 The total score of the chessboard, calculated by summing up the intrinsic and positional values of all pieces, gives an overall appraisal of the game state. This evaluation is essential for a chess engine's decision-making process. It helps the engine decide which moves are better than others, formulate long-term strategies, and even determine the order in which moves should be explored during the search process
 
+![Move-order](/images/move-order.png)
 
 Ok now we have understanding of how engine works let's understand how to make it effecient ?
 
@@ -88,6 +95,9 @@ Alpha: Represents the best (highest) value found so far by any means along the p
 Beta: Represents the best (lowest) value found so far by any means along the path for the minimizing player (e.g., black).
 If the algorithm finds a move that is better than the current alpha (for the maximizing player) or beta (for the minimizing player), it updates the alpha or beta accordingly.
 If, during the exploration of the subtree, the algorithm finds a node where the beta of the minimizing player becomes less than or equal to the alpha of the maximizing player, it knows that the maximizing player won't choose this path because the minimizing player has a better option elsewhere. So, the algorithm prunes (cuts off) this branch and doesn't explore it further.
+
+
+![Depth](/images/alpha-beta.png)
 
 In the context of game trees, depth refers to how many moves ahead the algorithm is exploring. Each level of depth represents a move by one player (e.g., white), followed by a response by the opponent (e.g., black).
 
@@ -132,6 +142,7 @@ OK Gaurav We tackled the memory but how we are managing the time you may have sa
 ok let's understanding it with an analogy :
 Imagine you're building a puzzle, and each friend helps with a different section. The depth of the task represents its complexity, like adding more layers to the puzzle. Recursive calls break down complex tasks into smaller parts, just as you might divide a puzzle into smaller sections to solve them. As depth increases, so does the demand for memory and processing power. Here multiprocessing helps by distributing the workload across multiple CPU cores, allowing tasks to be completed faster and more efficiently.
 
+![Depth](/images/trans-table.jpg)
 By far you have got an answer of using multiprocessing let's understand how it gonna help sepentia:
 In Sepentia, the search process involves exploring possible moves and counter-moves where this search can be broken down into independent tasks that can be executed simultaneously. Multiprocessing allows the chess engine to perform these tasks concurrently across multiple CPU cores, drastically speeding up the search process where each core can explore a different branch of the game tree simultaneously, effectively increasing the search depth within the same amount of time. While one process explores a particular branch, other processes can generate moves for subsequent branches, thus overlapping computation and improving efficiency which helps to process more positions per second.
 
