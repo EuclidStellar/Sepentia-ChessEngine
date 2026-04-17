@@ -29,7 +29,7 @@ export default function ChessBoard({ board, selected, legalDestinations, onSquar
               >
                 {piece !== "--" && (
                   <img
-                    src={`/pieces/${piece}.png`}
+                    src={`${import.meta.env.BASE_URL}pieces/${piece}.png`}
                     alt={piece}
                     draggable={false}
                   />
