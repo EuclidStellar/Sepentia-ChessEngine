@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtualenvs
+.venv/
+.venv-pypy/
+venv/
+env/
+
+# OS
+.DS_Store
+
+# Optional engine data (dropped in by the user, not part of source)
+book.bin
+syzygy/

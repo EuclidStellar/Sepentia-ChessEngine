@@ -2,7 +2,8 @@
 import pygame as p
 import chessengine, ChessAI , HighlightArea , MoveLog
 import sys
-from multiprocessing import Process, Queue
+import threading
+import queue as _queue
 
 BOARD_WIDTH = BOARD_HEIGHT = 620
 MOVE_LOG_PANEL_WIDTH = 256
@@ -39,7 +40,7 @@ def main():
     game_over = False
     ai_thinking = False
     move_undone = False
-    move_finder_process = None
+    move_finder_thread = None
     move_log_font = p.font.SysFont("Arial", 14, False, False)
     player_one = True# if a human is playing white, then this will be True, else False
     player_two = False # if a hyman is playing white, then this will be True, else False
@@ -82,7 +83,8 @@ def main():
                     animate = False
                     game_over = False
                     if ai_thinking:
-                        move_finder_process.terminate()
+                        ChessAI.request_cancel()
+                        move_finder_thread.join()
                         ai_thinking = False
                     move_undone = True
                 if e.key == p.K_r:  # reset the game when 'r' is pressed
@@ -94,20 +96,31 @@ def main():
                     animate = False
                     game_over = False
                     if ai_thinking:
-                        move_finder_process.terminate()
+                        ChessAI.request_cancel()
+                        move_finder_thread.join()
                         ai_thinking = False
+                    # Reset persistent TT on new game so stale entries don't
+                    # leak into a fresh position.
+                    ChessAI.transposition_table = {}
                     move_undone = True
 
         # AI move finder
         if not game_over and not human_turn and not move_undone:
             if not ai_thinking:
                 ai_thinking = True
-                return_queue = Queue()  # used to pass data between threads
-                move_finder_process = Process(target=ChessAI.findBestMove, args=(game_state, valid_moves, return_queue))
-                move_finder_process.start()
+                return_queue = _queue.Queue()
+                move_finder_thread = threading.Thread(
+                    target=ChessAI.findBestMove,
+                    args=(game_state, valid_moves, return_queue),
+                    daemon=True,
+                )
+                move_finder_thread.start()
 
-            if not move_finder_process.is_alive():
-                ai_move = return_queue.get()
+            if not move_finder_thread.is_alive():
+                try:
+                    ai_move = return_queue.get_nowait()
+                except _queue.Empty:
+                    ai_move = None
                 if ai_move is None:
                     ai_move = ChessAI.findRandomMove(valid_moves)
                 game_state.makeMove(ai_move)

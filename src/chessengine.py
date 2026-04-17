@@ -26,6 +26,21 @@ class GameState:
         self.current_castling_rights = CastleRights(True, True, True, True)
         self.castle_rights_log = [CastleRights(self.current_castling_rights.wks, self.current_castling_rights.bks,
                                                self.current_castling_rights.wqs, self.current_castling_rights.bqs)]
+        # Position-hash history for threefold-repetition detection.
+        self.position_history = [self.getHashKey()]
+
+    def isRepetition(self):
+        """True if the current position's hash has appeared earlier in the
+        game — used in search to treat repeated positions as draws so the
+        engine avoids them when winning. Walks same-side-to-move positions
+        only (every 2 plies) and stops at the last irreversible move."""
+        if len(self.position_history) < 3:
+            return False
+        current = self.position_history[-1]
+        for i in range(len(self.position_history) - 3, -1, -2):
+            if self.position_history[i] == current:
+                return True
+        return False
 
     def makeMove(self, move):
         """
@@ -78,12 +93,18 @@ class GameState:
         self.updateCastleRights(move)
         self.castle_rights_log.append(CastleRights(self.current_castling_rights.wks, self.current_castling_rights.bks,
                                                    self.current_castling_rights.wqs, self.current_castling_rights.bqs))
+        self.position_history.append(self.getHashKey())
     def getHashKey(self):
         """
         Returns a unique identifier for the current board state.
+        Must include side-to-move, castle rights, and en-passant target —
+        otherwise the transposition table returns wrong entries.
         """
-        
-        return str(self.board)
+        board_tuple = tuple(tuple(row) for row in self.board)
+        cr = self.current_castling_rights
+        return (board_tuple, self.white_to_move,
+                cr.wks, cr.bks, cr.wqs, cr.bqs,
+                self.enpassant_possible)
     def undoMove(self):
         """
         Undo the last move
@@ -120,6 +141,8 @@ class GameState:
                     self.board[move.end_row][move.end_col + 1] = '--'
             self.checkmate = False
             self.stalemate = False
+            if self.position_history:
+                self.position_history.pop()
 
     def updateCastleRights(self, move):
         """
